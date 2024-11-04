@@ -74,6 +74,13 @@ public class UserController {
 	}
 
 	
+	/**
+	 * 마이페이지 화면 - 정보 전달
+	 * @param model
+	 * @param principal
+	 * @param session
+	 * @return
+	 */
 	@GetMapping("/mypage")
 	public String mypage(Model model, Principal principal, HttpSession session) {
 	    // 1. 로그인한 유저의 정보 가져오기
@@ -166,6 +173,7 @@ public class UserController {
 	}
 
 	
+	// 운행률 계산 함수
 	private String getVoyagePer(Long vNumber) {
 		VoyageDTO voyage = voyageService.selectOne(vNumber);
 		LocalDateTime arrivalDate = voyage.getArrivalDate();
@@ -213,27 +221,30 @@ public class UserController {
         return response;
     }
 	
+    
+    // 즐겨찾기 변경 후 response 전달
 	@PostMapping("/favorite")
 	@ResponseBody
 	public Map<String, Object> changeFavorite(@RequestParam("vNumber") Long vNumber) {
 		Map<String, Object> response = new HashMap<>();
-		boolean success = favoriteVoyageService.changeTopFavorite(vNumber);
+		boolean success = favoriteVoyageService.changeTopFavorite(vNumber); // 즐겨찾기 변경 후 결과값 전달
 		response.put("success", success);
 		return response;
 	}
 	
 	
+	// 즐겨찾기 삭제
 	@PostMapping("/deleteFavorite")
 	public String deleteFavorite(@RequestParam("vNumbers") List<Long> vNumbers,
 			HttpSession session,
-			RedirectAttributes rttr //redirect는 model을 받을 수 없기에 redirect attribute가 필요
+			RedirectAttributes rttr // redirect는 model을 받을 수 없기에 redirect attribute 필요
 			) {
 
 		for (Long vNumber : vNumbers) {
 			favoriteVoyageService.deleteFev(vNumber);
 			}
 		
-		//기존 세션 확인 및 값 전달
+		// 기존 세션 확인 및 값 전달
 		if(session.getAttributeNames().hasMoreElements()) {
 			rttr.addAttribute("session_port",(String) session.getAttribute("session_port"));
 			rttr.addAttribute("session_callsign",(String) session.getAttribute("session_callSign"));

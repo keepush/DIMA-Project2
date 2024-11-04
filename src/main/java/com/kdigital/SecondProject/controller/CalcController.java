@@ -22,36 +22,41 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-/**
- * 계산기 정보 화면으로 이동
- * */
 @Controller
 @Slf4j
 @RequiredArgsConstructor
+
+/**
+ * 계산기 정보 화면으로 이동
+ * */
+
 public class CalcController {
-	
 	
 final private VoyageService voyageService;
 final private ShipService shipService; 
 final private PortService portService;
 	
-	
 	/**
-	 * 상단 메뉴바를 통한 계산 정보 화면 요청
-	 * */
-	
+	 * 상단 메뉴바를 통한 계산기 화면 요청
+	 * -> 비회원/정회원 모두 전달되는 기본 정보 동일(0)
+	 * @param model
+	 * @param session
+	 * @return
+	 */
+
 	@GetMapping("port/calcdetail")
 	public String hearderPortD(Model model, HttpSession session) {
 		// 기본값 설정
 		model.addAttribute("portName", "국내항");
 		model.addAttribute("tonnage", 0);
-				
+		
+		// 출항 일시, 입항 일시 yyyy-MM-dd 형태 변환, 설정
 		LocalDate today = LocalDate.now();
 		String todayformat = today.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
 		model.addAttribute("importDate", todayformat);
 		model.addAttribute("exportDate", todayformat);
 			
-		// 작업 시간과 대기 시간 설정
+		// 작업 시간, 대기 시간 설정
 	    int defaultHour = 0;
 	    int defaultMinute = 0;
 	    
@@ -80,8 +85,10 @@ final private PortService portService;
 	}
 	
 	
+	
 	/**
 	 * 메인 화면을 통한 접속
+	 * -> 정회원 로그인 시에만 가능
 	 * @param callSign
 	 * @param model
 	 * @return
@@ -89,7 +96,7 @@ final private PortService portService;
 	@Transactional
 	@GetMapping("calc/calcdetail")
 	public String mainPortD(@RequestParam("callSign") String callSign, Model model, HttpSession session) {
-		// call sign 기준 항해, 선박 정보 조회
+		// call sign으로 기준 항해, 선박 정보 조회
 		VoyageDTO voyage = voyageService.selectVoyageWithCallSign(callSign);
 		ShipDTO ship = shipService.selectOneShip(callSign);
 		
@@ -98,23 +105,22 @@ final private PortService portService;
 		String portCode = portEntity.getPortCode();
 		PortDTO port = portService.selectPortByPortCode(portCode);
 		
-		// 입항 일시 (arrivalDate) 가져오기
+		// 입출항일시 가져오기
 	    LocalDateTime arrivalDate = voyage.getArrivalDate();
-
-	    // 출항 예정 일시 (exportDate) 구하기
 	    LocalDateTime exportDate = voyage.getDepartureDate();
 	    
-	    // 대기 시간과 작업 시간 계산
+	    
+	    // 대기 시간 + 작업 시간 계산
 	    double avgWaitingTime = port.getAvgWaitingTime();
 	    double avgWorkingTime = port.getAvgWorkingTime();
 	    
-	    // 대기 시간과 작업 시간을 시간과 분으로 분리
-	    long waitingHours = (long) avgWaitingTime; // 정수 부분: 시간
-	    long waitingMinutes = (long) ((avgWaitingTime - waitingHours) * 60); // 소수점 부분: 분
+	    long waitingHours = (long) avgWaitingTime; 
+	    long waitingMinutes = (long) ((avgWaitingTime - waitingHours) * 60);
 	    long workingHours = (long) avgWorkingTime;
 	    long workingMinutes = (long) ((avgWorkingTime - workingHours) * 60);
 	    
-	    // 입항 예정 일시에 대기 시간과 작업 시간을 더함
+	    
+	    // 출항 예정 일시 = 입항 예정 일시 + 대기 시간 + 작업 시간
 	    exportDate = arrivalDate.plusHours(waitingHours + workingHours)
 	                           .plusMinutes(waitingMinutes + workingMinutes);
 	    
@@ -122,16 +128,17 @@ final private PortService portService;
         exportDate = exportDate.plusYears(2);
 	    
 		
-        // LocalDateTime을 yyyy-MM-dd 형식의 문자열로 변환 (표시용)
+        // 계산 편의성을 위해 두 종류로 나누어 값 전달
+        // 1. 출항 일시, 입항 일시 yyyy-MM-dd 형태 변환, 설정 (표시용)
         String arrivalDateDisplayStr = arrivalDate.toLocalDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
         String exportDateDisplayStr = exportDate.toLocalDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
 
-        // 실제 값을 위한 LocalDateTime 포맷 (서버에서 처리용으로 사용)
+        // 2. 실제 계산을 위한 LocalDateTime 포맷 (서버 처리용 - hidden)
         String arrivalDateFullStr = arrivalDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm"));
         String exportDateFullStr = exportDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm"));
 		
 		
-		// 대기 시간과 작업 시간 변환
+		// 대기 시간, 작업 시간 변환
 		// 1. 작업 시간
 		double time = port.getAvgWorkingTime();
 		int hour = (int) time;
@@ -140,6 +147,8 @@ final private PortService portService;
 		// 2. 대기 시간
 		int hour1 = (int) avgWaitingTime;
 		int minute1 = (int) ((avgWaitingTime - hour1) * 60);
+		
+		
 		
 		// 기본 값 설정
 		model.addAttribute("portName", port.getPortName());
@@ -156,10 +165,10 @@ final private PortService portService;
 		model.addAttribute("callSign", callSign);
 		
 	    
-	    // 저장 버튼 상태 플래그 설정
+	    // 저장 버튼 상태 플래그
 	    model.addAttribute("isSaveEnabled", true);
 
-		//기존 세션 확인 및 값 전달
+		// 기존 세션 확인 및 값 전달
 		if(session.getAttributeNames().hasMoreElements()) {
 		   model.addAttribute("session_port",(String) session.getAttribute("session_port"));
 		   model.addAttribute("session_callsign",(String) session.getAttribute("session_callSign"));

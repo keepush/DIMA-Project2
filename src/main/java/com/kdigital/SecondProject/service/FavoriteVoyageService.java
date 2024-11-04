@@ -67,21 +67,22 @@ public class FavoriteVoyageService {
 		
 		UserEntity userEntity = userEntity1.get();
 		
-		// 사용자+항해를 결합하여 저장용으로 생성
+		// 사용자 + 항해를 결합하여 저장용으로 생성
 		FavoriteVoyageEntity newFavEntity = FavoriteVoyageEntity.builder()
 				.userEntity(userEntity)
 				.voyageEntity(voyEntity)
 				.topFavorite("0")
 				.build();
 		
-		//해당 사용자가 해당 항해를 이미 선호 항해로 저장하였는가를 확인
+		// 해당 사용자가 해당 항해를 이미 선호 항해로 저장하였는가 확인
 		boolean result = isExist(voyEntity.getVNumber());
 		log.info("isExist 결과: {}", result);
 		if (result) {
 			log.info("이미 저장된 항해입니다.");
 			return false;
 		}
-		//사용자가 등록한 선호 항해의 수가 10개를 초과하는지 확인
+		
+		// 사용자가 등록한 선호 항해의 수가 10개를 초과하는지 확인
 		long count = favoriteVoyageRepository.countByUserEntity_UserId(userId);
 		if(count>=10) {
 			log.info("해당 사용자의 선호 항해 10개가 저장되어있습니다.");
@@ -95,7 +96,8 @@ public class FavoriteVoyageService {
 	
 	
 	/**
-	 * 항해 즐겨 찾기 지정 및 수정
+	 * 항해 즐겨찾기 지정 및 수정
+	 * -> top_favorite이 1일 경우, 즐겨찾기 항해. 1개만 지정 가능
 	 * @param vNumber
 	 * @return true/false
 	 * */
@@ -127,13 +129,13 @@ public class FavoriteVoyageService {
 	     Optional<FavoriteVoyageEntity> existingFavorite = favoriteVoyageRepository.findByUserEntityAndTopFavorite(userEntity, "1");
 
 	     if (existingFavorite.isPresent()) {
-	         // 이미 top_favorite이 1인 항해가 있으면 그 항해의 top_favorite을 0으로 변경
+	         // 이미 top_favorite이 1인 항해가 있으면, 그 항해의 top_favorite을 0으로 변경
 	         FavoriteVoyageEntity currentTopFavorite = existingFavorite.get();
 	         currentTopFavorite.setTopFavorite("0");
 	         favoriteVoyageRepository.save(currentTopFavorite); // 변경된 값 저장
 	     }
 
-	     // 새로 지정할 항해를 찾고 top_favorite을 1로 변경
+	     // 새로 지정할 항해를 찾고, top_favorite을 1로 변경
 	     Optional<FavoriteVoyageEntity> favoriteVoyageOpt = favoriteVoyageRepository.findByUserEntity_UserIdAndVoyageEntity_vNumber(userId, vNumber);
 	     if (favoriteVoyageOpt.isPresent()) {
 	         FavoriteVoyageEntity favoriteVoyage = favoriteVoyageOpt.get();
@@ -183,7 +185,7 @@ public class FavoriteVoyageService {
 	
 	
 	/**
-	 * 이미 선호로 등록된 항해인지 확인
+	 * 이미 즐겨찾기로 등록된 항해인지 확인
 	 * @param vNumber
 	 * @return true/false
 	 */
