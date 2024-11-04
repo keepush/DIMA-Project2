@@ -43,16 +43,30 @@
 [![My Skills](https://skillicons.dev/icons?i=java,js,spring,mysql,html,css)](https://skillicons.dev)
 <br>
 
-## 담당 코드
+## 핵심 담당 코드
+### 1. Service.java
+[즐겨찾기 서비스 구현](src/main/java/com/kdigital/SecondProject/service/FavoriteVoyageService.java) <br>
+[사용자 서비스 구현](src/main/java/com/kdigital/SecondProject/service/UsersService.java) <br>
+### 2. HTML
+[항만 사용료 계산기](src/main/resources/templates/pages/calculator.html) <br>
+[마이페이지](src/main/resources/templates/pages/mypage.html) <br>
+### 3. js
+[항만 사용료 계산 로직과 저장, 초기화, chart.js 활용](src/main/resources/static/script/calculator.js) <br>
+[마이페이지 즐겨찾기 선박 설정 및 변경](src/main/resources/static/script/mypage.js) <br>
 
 <br>
 
 ## View
-1. 비회원 메인 화면
+### 1. 비회원 메인 화면
 ![스크린샷 2024-11-04 213412](https://github.com/user-attachments/assets/bfc8ac16-6302-42b9-adab-5da298a20331)
-2. 회원 메인 화면
+### 2. 회원 메인 화면
 ![스크린샷 2024-11-04 213435](https://github.com/user-attachments/assets/ae755272-04fe-4201-b000-fa291536e364)
-3. 항만 사용료 계산기 화면
-![스크린샷 2024-11-04 213447](https://github.com/user-attachments/assets/e65490e5-1045-4742-aec5-aede0e842c76)
-4. 마이페이지 화면
+### 3. 마이페이지 화면
 ![스크린샷 2024-11-04 213459](https://github.com/user-attachments/assets/4fc41d15-e059-449a-9848-a1f850ad281f)
+### 4. 항만 사용료 계산기 화면
+![스크린샷 2024-11-04 213447](https://github.com/user-attachments/assets/e65490e5-1045-4742-aec5-aede0e842c76)
+### 5. 선박 정보 화면
+![스크린샷 2024-11-04 213821](https://github.com/user-attachments/assets/7bdf2310-9bdb-4f40-bc02-965e9ed3079d)
+### 6. 목적지 정보 화면
+![스크린샷 2024-11-04 213832](https://github.com/user-attachments/assets/6ac0d477-b163-4b73-b287-55a8c4b8987c)
+
