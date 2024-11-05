@@ -385,21 +385,24 @@ function checkTimeConstraint() {
     const waitingHour = parseFloat(document.getElementById('waitingHour').value) || 0;
     const waitingMinute = parseFloat(document.getElementById('waitingMinute').value) || 0;
 
-    // 작업 시간 + 대기 시간 (분)
-    const totalRequiredMinutes = (workingHour * 60 + workingMinute) + (waitingHour * 60 + waitingMinute);
+    // 작업 시간 + 대기 시간 (분) Decimal로 계산
+    const totalRequiredMinutes = new Decimal(workingHour).times(60)
+        .plus(workingMinute)
+        .plus(new Decimal(waitingHour).times(60))
+        .plus(waitingMinute);
 
-    // 수정 출항 일시 - 입항 일시 (분)
-    const totalAvailableMinutes = (userEnteredExportDate - importDate) / (1000 * 60); // 밀리초를 분으로 변환
+    // 수정 출항 일시 - 입항 일시 (분) Decimal로 계산
+    const totalAvailableMinutes = new Decimal(userEnteredExportDate - importDate).dividedBy(1000 * 60); // 밀리초를 분으로 변환
 
     // 오류 디버깅 위한 값 출력
-    console.log('총 필요한 시간 (분):', totalRequiredMinutes);
-    console.log('총 가능한 시간 (분):', totalAvailableMinutes);
+    console.log('총 필요한 시간 (분):', totalRequiredMinutes.toString());
+    console.log('총 가능한 시간 (분):', totalAvailableMinutes.toString());
     console.log('입항 일시:', importDate);
     console.log('사용자 입력 출항 일시:', userEnteredExportDate);
 
     // 조건 체크
-    if (totalRequiredMinutes > totalAvailableMinutes) {
-        alert('작업 시간과 대기 시간의 합이 입항 일시와 출항 예정 일시 사이의 시간을 초과합니다. 출항 예정 일시를 바꿔 주세요.');
+    if (totalRequiredMinutes.greaterThan(totalAvailableMinutes)) {
+        alert('작업 시간과 대기 시간의 합이 입항 일시와 출항 예정 일시 사이의 시간을 초과합니다.');
         return false;
     }
 
